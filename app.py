@@ -8,8 +8,7 @@ import plotly.graph_objects as go
 from collections import Counter
 import re
 
-# 读取数据
-data = pd.read_csv(r'C:/Users/19338/OneDrive/桌面/tripadvisor_cleaned_final.csv')
+data = pd.read_csv('tripadvisor_cleaned_final.csv')
 
 # 预处理
 data['rating'] = data['rating'].fillna(0)
