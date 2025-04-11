@@ -7,7 +7,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from collections import Counter
 import re
+import os
 
+# 读取数据
 data = pd.read_csv('tripadvisor_cleaned_final.csv')
 
 # 预处理
@@ -23,7 +25,7 @@ data_scaled = scaler.fit_transform(features)
 kmeans = KMeans(n_clusters=6, random_state=0)
 data['cluster'] = kmeans.fit_predict(data_scaled)
 
-# 初始化 app
+# 初始化 Dash app
 app = Dash(__name__)
 
 # 主地图图层
@@ -37,7 +39,7 @@ map_fig = px.scatter_mapbox(
     mapbox_style='carto-positron',
 )
 
-# Layout
+# 页面布局
 app.layout = html.Div([
     html.Div([
         dcc.Graph(
@@ -65,10 +67,11 @@ def extract_keywords(text_series, topn=10):
     common = Counter(filtered).most_common(topn)
     return pd.DataFrame(common, columns=['word', 'count'])
 
-# 回调函数
+# 通用柱状图函数
 def gen_hist(df, col, nbins=10, title=''):
     return px.histogram(df, x=col, nbins=nbins, title=title)
 
+# 回调函数
 @app.callback(
     [Output('keyword-bar', 'figure'),
      Output('rating-hist', 'figure'),
@@ -89,5 +92,7 @@ def update_dashboard(hoverData):
     price_fig = gen_hist(cluster_df, 'priceRange_clean', 10, '价格分布')
     return keyword_fig, rating_fig, price_fig
 
+# ✅ 正确的 Render 部署方式
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8050))
+    app.run(host='0.0.0.0', port=port)
